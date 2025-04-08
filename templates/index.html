@@ -1,22 +1,192 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App</title>
+    <title>Claims System Modernization: Monte Carlo Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-sans">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-blue-600 mb-4">Welcome to Flask</h1>
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <p class="text-gray-700 mb-4">This is a Flask application with Tailwind CSS styling.</p>
-            <button id="greetButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Click me!
-            </button>
-        </div>
-    </div>
-</body>
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Claims System Modernization: Monte Carlo Risk Analysis</h1>
+
+        <form id="simulation-form">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+                <fieldset class="bg-white p-6 rounded-lg shadow">
+                    <legend class="text-xl font-semibold mb-4 text-gray-700">Overall Parameters</legend>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="num_members" class="block text-sm font-medium text-gray-600">Number of Members</label>
+                            <input type="number" id="num_members" name="num_members" value="3000000" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Total members covered.</p>
+                        </div>
+                        <div>
+                            <label for="discount_rate" class="block text-sm font-medium text-gray-600">Annual Discount Rate (%)</label>
+                            <input type="number" id="discount_rate" name="discount_rate" value="5" step="0.1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Rate for NPV calculation.</p>
+                        </div>
+                        <div>
+                            <label for="sim_years" class="block text-sm font-medium text-gray-600">Simulation Horizon (Years)</label>
+                            <input type="number" id="sim_years" name="sim_years" value="10" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Simulation duration.</p>
+                        </div>
+                         <div>
+                            <label for="target_roi" class="block text-sm font-medium text-gray-600">Target ROI (%)</label>
+                            <input type="number" id="target_roi" name="target_roi" value="15" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Target ROI for probability calculation (Path A mainly).</p>
+                        </div>
+                        <div>
+                            <label for="num_runs" class="block text-sm font-medium text-gray-600">Monte Carlo Iterations</label>
+                            <input type="number" id="num_runs" name="num_runs" value="5000" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">More runs = more accuracy (max ~10k recommended for browser performance).</p>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="bg-white p-6 rounded-lg shadow">
+                    <legend class="text-xl font-semibold mb-4 text-blue-600">Path A: Traditional Implementation</legend>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Migration Cost per Member ($ Range)</label>
+                            <div class="flex space-x-2 mt-1">
+                                <input type="number" id="path_a_cost_min_pm" name="path_a_cost_min_pm" value="100" placeholder="Min" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                                <input type="number" id="path_a_cost_max_pm" name="path_a_cost_max_pm" value="150" placeholder="Max" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Est. Total: $<span id="path_a_total_cost_display" class="font-medium">300M - 450M</span></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Implementation Duration (Years Range)</label>
+                            <div class="flex space-x-2 mt-1">
+                                <input type="number" id="path_a_duration_min" name="path_a_duration_min" value="3" placeholder="Min" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                                <input type="number" id="path_a_duration_max" name="path_a_duration_max" value="6" placeholder="Max" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Annual Savings/Benefits ($M Range)</label>
+                             <div class="flex space-x-2 mt-1">
+                                <input type="number" id="path_a_benefits_min_pa_m" name="path_a_benefits_min_pa_m" value="10" placeholder="Min" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                                <input type="number" id="path_a_benefits_max_pa_m" name="path_a_benefits_max_pa_m" value="25" placeholder="Max" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Annual savings if not disrupted.</p>
+                        </div>
+                        <div>
+                             <label for="path_a_obsolescence_risk" class="block text-sm font-medium text-gray-600">AI Obsolescence Risk (% Annual Increase)</label>
+                            <div class="flex space-x-2 mt-1">
+                                <input type="number" id="path_a_obsolescence_risk" name="path_a_obsolescence_risk" value="10" placeholder="Risk %" class="block w-1/2 p-2 border border-gray-300 rounded-md shadow-sm">
+                                <input type="number" id="path_a_obsolescence_start_year" name="path_a_obsolescence_start_year" value="3" placeholder="Start Yr" class="block w-1/2 p-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                             <p class="mt-1 text-xs text-gray-500">Benefit degradation risk % per year, starting after year X post-implementation.</p>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="bg-white p-6 rounded-lg shadow">
+                     <legend class="text-xl font-semibold mb-4 text-green-600">Path B: Targeted AI Investments</legend>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Annual AI Investment ($M Range)</label>
+                            <div class="flex space-x-2 mt-1">
+                                <input type="number" id="path_b_cost_min_pa_m" name="path_b_cost_min_pa_m" value="5" placeholder="Min" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                                <input type="number" id="path_b_cost_max_pa_m" name="path_b_cost_max_pa_m" value="20" placeholder="Max" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="path_b_duration" class="block text-sm font-medium text-gray-600">AI Investment Duration (Years)</label>
+                            <input type="number" id="path_b_duration" name="path_b_duration" value="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <div>
+                            <label for="path_b_success_prob" class="block text-sm font-medium text-gray-600">Probability of High Impact Success (%)</label>
+                            <input type="number" id="path_b_success_prob" name="path_b_success_prob" value="60" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-600">Annual AI Savings/Benefits ($M Range, if successful)</label>
+                             <div class="flex space-x-2 mt-1">
+                                <input type="number" id="path_b_benefits_min_pa_m" name="path_b_benefits_min_pa_m" value="15" placeholder="Min" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                                <input type="number" id="path_b_benefits_max_pa_m" name="path_b_benefits_max_pa_m" value="50" placeholder="Max" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-600">Annual Cost of Delay ($M Range)</label>
+                             <div class="flex space-x-2 mt-1">
+                                <input type="number" id="path_b_delay_cost_min_pa_m" name="path_b_delay_cost_min_pa_m" value="5" placeholder="Min" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                                <input type="number" id="path_b_delay_cost_max_pa_m" name="path_b_delay_cost_max_pa_m" value="10" placeholder="Max" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                             <p class="mt-1 text-xs text-gray-500">Cost of *not* having the traditional system while investing in AI.</p>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="text-center mb-8">
+                <button id="run_simulation_btn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out">
+                    Run Simulation
+                </button>
+                <div id="loading_indicator" class="hidden mt-4 text-indigo-600">
+                    <svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    Running simulation...
+                </div>
+                 <div id="error_message" class="hidden mt-4 text-red-600 font-medium"></div>
+            </div>
+        </form>
+
+        <div id="outputs-section" class="bg-white p-6 rounded-lg shadow mb-8 hidden">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800 text-center">Simulation Results</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">Key Metrics Comparison</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Path A (Traditional)</th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Path B (AI Invest)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Avg. NPV</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">$<span id="path_a_avg_npv">--</span>M</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">$<span id="path_b_avg_npv">--</span>M</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Risk of Negative NPV</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><span id="path_a_neg_prob">--</span>%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><span id="path_b_neg_prob">--</span>%</td>
+                                </tr>
+                                 <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Prob. >= Target ROI</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><span id="path_a_roi_prob">--</span>%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><span id="path_b_roi_prob">--</span>%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Prob. Path B Outperforms Path A</td>
+                                    <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"><span id="prob_b_beats_a">--</span>%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="mt-4 text-center">
+                         <h4 class="text-md font-semibold mb-1 text-gray-700">Scenario Extremes (NPV)</h4>
+                         <p class="text-sm text-gray-600">Path A: Best $<span id="path_a_max_npv">--</span>M / Worst $<span id="path_a_min_npv">--</span>M</p>
+                         <p class="text-sm text-gray-600">Path B: Best $<span id="path_b_max_npv">--</span>M / Worst $<span id="path_b_min_npv">--</span>M</p>
+                     </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-3 text-gray-700">NPV Distribution (Millions $)</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                         <canvas id="npv_chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            </div> </div> </body>
 </html>
